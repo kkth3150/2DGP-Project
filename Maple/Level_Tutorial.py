@@ -19,6 +19,8 @@ class level_tutorial:
 
         rm.load("UI_EXP_BAR","Resource/UI/EXPBar.png")
 
+        rm.load("Inventory", "Resource/UI/Inventory_Small.png")
+
 
 
         self.bg_image = rm.get(self.bg_key)

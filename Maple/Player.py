@@ -6,7 +6,7 @@ from pico2d import *
 from enum import Enum, auto
 from Resource_Manager import ResourceManager
 from Animation_Manager import Animation
-
+from Inventory import Inventory
 
 class PlayerState(Enum):
     IDLE = auto()
@@ -23,6 +23,8 @@ class Direction(Enum):
 class Player(GameObject):
     def __init__(self, x=400, y=300):
         super().__init__(x, y, size=50)
+
+        self.inventory = Inventory(self, x=400, y=300)
         self.hp = 100
         self.speed = 200
         self.vy = 0
@@ -74,6 +76,7 @@ class Player(GameObject):
         self.apply_gravity(dt)
         self.update_scroll()
         self.animations[(self.state, self.direction)].update(dt)
+        self.inventory.update(dt)
 
     def handle_attack_timer(self, dt):
         if self.attack_timer > 0:
@@ -117,6 +120,9 @@ class Player(GameObject):
             self.state = PlayerState.ATTACK
             self.attack_timer = 0.45  # 공격 모션 지속 시간
 
+        if im.Key_Down(SDLK_i):
+            self.inventory.is_open = not self.inventory.is_open
+
         self.x += dx
 
     def apply_gravity(self, dt):
@@ -153,6 +159,8 @@ class Player(GameObject):
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
         anim = self.animations[(self.state, self.direction)]
         anim.draw(self.x, self.y, scroll_x, scroll_y)
+
+        self.inventory.render()
 
     def late_update(self):
         pass
