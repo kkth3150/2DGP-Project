@@ -1,11 +1,11 @@
-class level_tutorial:
+class level_boss_enter:
     def __init__(self):
         pass
 
     def initialize(self):
         pass
 
-    def update(self):
+    def update(self,dt):
         pass
 
     def late_update(self):

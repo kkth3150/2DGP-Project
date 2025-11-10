@@ -46,9 +46,9 @@ class level_manager:
             self.level.initialize()
             self.prev_level = self.cur_level
 
-    def update(self):
+    def update(self,dt):
         if self.level:
-            self.level.update()
+            self.level.update(dt)
 
     def late_update(self):
         if self.level:

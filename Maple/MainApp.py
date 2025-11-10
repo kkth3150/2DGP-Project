@@ -1,5 +1,6 @@
 from pico2d import *
-from LevelManager.Level_Manager import level_manager, LEVEL_ID
+from Level_Manager import level_manager, LEVEL_ID
+import time
 
 class MainApp:
     def __init__(self):
@@ -10,8 +11,8 @@ class MainApp:
         self.level_manager.level_change(LEVEL_ID.LEVEL_MENU)
         pass
 
-    def update(self):
-        self.level_manager.update()
+    def update(self, dt):
+        self.level_manager.update(dt)
         pass
 
     def late_update(self):
@@ -29,14 +30,26 @@ class MainApp:
 
 open_canvas()
 
+TARGET_FPS = 60
+TARGET_DT = 1.0 / TARGET_FPS
+last_time = time.time()
+
 mainapp = MainApp()
 mainapp.initialize()
 
 while mainapp.running:
-    mainapp.update()
+    current_time = time.time()
+    dt = current_time - last_time
+    last_time = current_time
+
+    mainapp.update(dt)
     mainapp.late_update()
     mainapp.render()
-    delay(0.01)
+
+    elapsed = time.time() - current_time
+    sleep_time = TARGET_DT - elapsed
+    if sleep_time > 0:
+        delay(sleep_time * 1000)  # delay는 ms 단위
 
 mainapp.release()
 close_canvas()

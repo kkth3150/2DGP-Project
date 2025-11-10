@@ -1,11 +1,11 @@
-class level_quest:
+class level_boss:
     def __init__(self):
         pass
 
     def initialize(self):
         pass
 
-    def update(self):
+    def update(self,dt):
         pass
 
     def late_update(self):

@@ -5,7 +5,7 @@ class level_menu:
     def initialize(self):
         pass
 
-    def update(self):
+    def update(self,dt):
         pass
 
     def late_update(self):
