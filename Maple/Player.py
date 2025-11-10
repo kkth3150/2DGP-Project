@@ -3,18 +3,64 @@ from Input_Manager import Input_manager
 from Scroll_Manager import ScrollManager
 from Line_Manager import LineManager
 from pico2d import *
+from enum import Enum, auto
+from Resource_Manager import ResourceManager
+from Animation_Manager import Animation
+
+
+class PlayerState(Enum):
+    IDLE = auto()
+    WALK = auto()
+    ATTACK = auto()
+    JUMP = auto()
+
+
+class Direction(Enum):
+    LEFT = auto()
+    RIGHT = auto()
+
 
 class Player(GameObject):
-    def __init__(self, x=400, y=300):  # 초기 위치
+    def __init__(self, x=400, y=300):
         super().__init__(x, y, size=50)
         self.hp = 100
-        self.speed = 200          # 이동 속도
-        self.vy = 0               # Y 속도
-        self.gravity = -1000      # 중력 (픽셀/s²)
-        self.jump_power = 500     # 점프 힘
-        self.on_ground = False    # 라인 위인지
+        self.speed = 200
+        self.vy = 0
+        self.gravity = 1300
+        self.jump_power = 500
+        self.on_ground = False
 
-        # 스크롤 초기화
+        self.state = PlayerState.IDLE
+        self.direction = Direction.RIGHT
+
+        # 공격 타이머
+        self.attack_timer = 0
+        self.prev_state = PlayerState.IDLE
+
+        rm = ResourceManager.instance()
+        self.image_left = rm.get("Player_Left")
+        self.image_right = rm.get("Player_Right")
+
+        self.animations = {
+            (PlayerState.IDLE, Direction.RIGHT): Animation(self.image_right, 128, 128,
+                                                           {'x': 0, 'y': 512, 'frame_count': 4}),
+            (PlayerState.WALK, Direction.RIGHT): Animation(self.image_right, 128, 128,
+                                                           {'x': 0, 'y': 384, 'frame_count': 4}),
+            (PlayerState.ATTACK, Direction.RIGHT): Animation(self.image_right, 128, 128,
+                                                             {'x': 0, 'y': 256, 'frame_count': 3}),
+            (PlayerState.JUMP, Direction.RIGHT): Animation(self.image_right, 128, 128,
+                                                           {'x': 384, 'y': 256, 'frame_count': 1}),
+
+            (PlayerState.IDLE, Direction.LEFT): Animation(self.image_left, 128, 128,
+                                                          {'x': 0, 'y': 512, 'frame_count': 4}),
+            (PlayerState.WALK, Direction.LEFT): Animation(self.image_left, 128, 128,
+                                                          {'x': 0, 'y': 384, 'frame_count': 4}),
+            (PlayerState.ATTACK, Direction.LEFT): Animation(self.image_left, 128, 128,
+                                                            {'x': 0, 'y': 256, 'frame_count': 3}),
+            (PlayerState.JUMP, Direction.LEFT): Animation(self.image_left, 128, 128,
+                                                          {'x': 384, 'y': 256, 'frame_count': 1}),
+        }
+
         scroll_mgr = ScrollManager.instance()
         scroll_mgr.scroll_x = 0
         scroll_mgr.scroll_y = 0
@@ -23,47 +69,75 @@ class Player(GameObject):
         if self.is_dead:
             return
 
-        self.handle_input(dt)      # 키 입력 처리
-        self.apply_gravity(dt)     # 중력 적용 및 라인 충돌 체크
-        self.update_scroll()       # 스크롤 업데이트
+        self.handle_attack_timer(dt)
+        self.handle_input(dt)
+        self.apply_gravity(dt)
+        self.update_scroll()
+        self.animations[(self.state, self.direction)].update(dt)
+
+    def handle_attack_timer(self, dt):
+        if self.attack_timer > 0:
+            self.attack_timer -= dt
+            if self.attack_timer <= 0:
+                self.attack_timer = 0
+                self.state = self.prev_state  # 공격 끝나면 이전 상태로
 
     def handle_input(self, dt):
-        # 좌우 이동
         dx = 0
-        if Input_manager.instance().Key_Pressing(SDLK_a):
-            dx = -self.speed * dt
-        if Input_manager.instance().Key_Pressing(SDLK_d):
-            dx = self.speed * dt
+        im = Input_manager.instance()
+
+        # 지상 공격 중에는 이동 불가
+        if self.state == PlayerState.ATTACK and self.on_ground:
+            dx = 0
+        else:
+            # ← → 화살표 이동
+            if im.Key_Pressing(SDLK_LEFT):
+                dx = -self.speed * dt
+                self.direction = Direction.LEFT
+                if self.on_ground and self.attack_timer == 0:
+                    self.state = PlayerState.WALK
+            elif im.Key_Pressing(SDLK_RIGHT):
+                dx = self.speed * dt
+                self.direction = Direction.RIGHT
+                if self.on_ground and self.attack_timer == 0:
+                    self.state = PlayerState.WALK
+            else:
+                if self.on_ground and self.attack_timer == 0:
+                    self.state = PlayerState.IDLE
+
+        # 점프 → Alt (왼쪽 Alt 사용, 오른쪽 Alt면 SDLK_RALT)
+        if im.Key_Down(SDLK_LALT) and self.on_ground and self.attack_timer == 0:
+            self.vy = self.jump_power
+            self.on_ground = False
+            self.state = PlayerState.JUMP
+
+        # 공격 → Ctrl (왼쪽 Ctrl 사용, 오른쪽 Ctrl면 SDLK_RCTRL)
+        if im.Key_Down(SDLK_LCTRL) and self.attack_timer == 0:
+            self.prev_state = self.state
+            self.state = PlayerState.ATTACK
+            self.attack_timer = 0.45  # 공격 모션 지속 시간
 
         self.x += dx
 
-        # 점프
-        if Input_manager.instance().Key_Down(SDLK_SPACE) and self.on_ground:
-            self.vy = self.jump_power
-            self.on_ground = False
-
     def apply_gravity(self, dt):
-        # Y 속도에 중력 적용
-        self.vy += self.gravity * dt
-        self.y += self.vy * dt
+        self.vy -= self.gravity * dt
+        new_y = self.y + self.vy * dt
 
-        # 바닥 기준 충돌 체크
-        foot_y = self.y - self.size / 2  # 플레이어 바닥 위치
-        collided_y, collision = LineManager.instance().collision_line(self.x, foot_y, move_y=abs(self.vy * dt))
+        foot_y = new_y - self.size / 2
+        collided_y, collided = LineManager.instance().collision_line(self.x, foot_y, abs(self.vy * dt))
 
-        if collision and self.vy <= 0:  # 떨어질 때만 바닥에 붙도록
+        if collided and self.vy <= 0:
             self.y = collided_y + self.size / 2
             self.vy = 0
             self.on_ground = True
         else:
+            self.y = new_y
             self.on_ground = False
 
     def update_scroll(self):
         scroll_mgr = ScrollManager.instance()
-        left_border = 300
-        right_border = 500
-        top_border = 150
-        bottom_border = 200
+        left_border, right_border = 300, 500
+        top_border, bottom_border = 150, 200
 
         if self.x - scroll_mgr.scroll_x < left_border:
             scroll_mgr.set_scroll_x(self.x - scroll_mgr.scroll_x - left_border)
@@ -77,11 +151,8 @@ class Player(GameObject):
 
     def render(self):
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
-        draw_x = self.x - scroll_x
-        draw_y = self.y - scroll_y
-
-        draw_rectangle(draw_x - self.size / 2, draw_y - self.size / 2,
-                       draw_x + self.size / 2, draw_y + self.size / 2)
+        anim = self.animations[(self.state, self.direction)]
+        anim.draw(self.x, self.y, scroll_x, scroll_y)
 
     def late_update(self):
         pass

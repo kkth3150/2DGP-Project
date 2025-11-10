@@ -35,27 +35,22 @@ class LineManager:
         self.lines.append(line)
 
     def collision_line(self, x, y, move_y):
-        """
-        X 좌표에서 y 충돌 판정
-        :param x: 플레이어 X
-        :param y: 플레이어 현재 Y
-        :param move_y: 이동량
-        :return: 충돌한 Y 좌표, 충돌 여부
-        """
         if not self.lines:
             return y, False
 
         min_delta = float('inf')
         collided_y = y
+        tolerance = 5  # 발 위치에서 허용 오차
+
         for line in self.lines:
-            # 플레이어 X가 라인 범위 안에 있는지 확인
             if line.x1 <= x <= line.x2 or line.x2 <= x <= line.x1:
                 line_y = line.equation_y(x)
                 delta = line_y - y
-                # 아래 방향으로만 충돌 체크
-                if -move_y <= delta < min_delta:
-                    min_delta = delta
-                    collided_y = line_y
+                # 아래로 이동하거나, 라인 위 tolerance 범위 내
+                if -move_y - tolerance <= delta <= tolerance:
+                    if abs(delta) < min_delta:
+                        min_delta = abs(delta)
+                        collided_y = line_y
 
         return collided_y, min_delta != float('inf')
 

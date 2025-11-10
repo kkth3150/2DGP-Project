@@ -3,6 +3,7 @@ class GameObject:
         self.x = x
         self.y = y
         self.size = size
+        self.image_size = size
         self.is_dead = False
 
     def update(self, dt):
