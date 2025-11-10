@@ -1,6 +1,7 @@
 from pico2d import *
 from Level_Manager import level_manager, LEVEL_ID
 import time
+from Input_Manager import Input_manager
 
 class MainApp:
     def __init__(self):
@@ -8,7 +9,7 @@ class MainApp:
         self.level_manager = level_manager()
 
     def initialize(self):
-        self.level_manager.level_change(LEVEL_ID.LEVEL_MENU)
+        self.level_manager.level_change(LEVEL_ID.LEVEL_TUTORIAL)
         pass
 
     def update(self, dt):
@@ -36,20 +37,23 @@ last_time = time.time()
 
 mainapp = MainApp()
 mainapp.initialize()
+input_mgr = Input_manager.instance()
 
 while mainapp.running:
     current_time = time.time()
     dt = current_time - last_time
     last_time = current_time
 
+    input_mgr.update()
     mainapp.update(dt)
     mainapp.late_update()
     mainapp.render()
-
     elapsed = time.time() - current_time
     sleep_time = TARGET_DT - elapsed
     if sleep_time > 0:
-        delay(sleep_time * 1000)  # delay는 ms 단위
+        time.sleep(sleep_time)  # 초 단위
+
+
 
 mainapp.release()
 close_canvas()

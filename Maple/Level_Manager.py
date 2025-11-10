@@ -10,9 +10,18 @@ class LEVEL_ID(IntEnum):
 
 
 class level_manager:
+    _instance = None
+
+    @staticmethod
+    def instance():
+        if level_manager._instance is None:
+            level_manager._instance = level_manager()
+        return level_manager._instance
 
     def __init__(self):
-        self.cur_level = LEVEL_ID.LEVEL_MENU
+        if level_manager._instance is not None:
+            raise Exception("Use level_manager.instance() instead of creating a new one directly.")
+        self.cur_level = LEVEL_ID.END
         self.prev_level = LEVEL_ID.END
         self.level = None
 
@@ -46,7 +55,7 @@ class level_manager:
             self.level.initialize()
             self.prev_level = self.cur_level
 
-    def update(self,dt):
+    def update(self, dt):
         if self.level:
             self.level.update(dt)
 
