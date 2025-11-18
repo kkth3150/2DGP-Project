@@ -1,5 +1,6 @@
 from enum import IntEnum, auto
 
+
 OBJ_DEAD = 1
 OBJ_ALIVE = 0
 

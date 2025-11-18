@@ -18,7 +18,6 @@ class Line:
         bottom = min(self.y1, self.y2) - scroll_y - self.thickness / 2
         draw_rectangle(left, bottom, right, top)
 
-
 class LineManager:
     _instance = None
 
