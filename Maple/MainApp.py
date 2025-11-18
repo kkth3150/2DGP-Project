@@ -35,6 +35,7 @@ mainapp = MainApp()
 mainapp.initialize()
 input_mgr = Input_manager.instance()
 
+
 while mainapp.running:
     current_time = time.time()
     dt = current_time - last_time
@@ -48,9 +49,7 @@ while mainapp.running:
     sleep_time = TARGET_DT - elapsed
 
     if sleep_time > 0:
-        time.sleep(sleep_time)  # 초 단위
-
-
+        time.sleep(sleep_time)
 
 mainapp.release()
 close_canvas()

@@ -6,12 +6,13 @@ OBJ_ALIVE = 0
 
 class OBJ(IntEnum):
     BACKGROUND = 0
-    MONSTER = 1
-    BOSS = 2
-    PLAYER = 3
-    EFFECT = 4
-    UI = 5
-    END = 6
+    NPC = 1
+    MONSTER = 2
+    BOSS = 3
+    PLAYER = 4
+    EFFECT = 5
+    UI = 6
+    END = 7
 
 
 class ObjectManager:
