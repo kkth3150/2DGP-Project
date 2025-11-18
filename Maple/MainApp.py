@@ -10,15 +10,12 @@ class MainApp:
 
     def initialize(self):
         self.level_manager.level_change(LEVEL_ID.LEVEL_TUTORIAL)
-        pass
 
     def update(self, dt):
         self.level_manager.update(dt)
-        pass
 
     def late_update(self):
         self.level_manager.late_update()
-        pass
 
     def render(self):
         clear_canvas()
@@ -27,7 +24,6 @@ class MainApp:
 
     def release(self):
         self.level_manager.release()
-        pass
 
 open_canvas()
 
@@ -50,6 +46,7 @@ while mainapp.running:
     mainapp.render()
     elapsed = time.time() - current_time
     sleep_time = TARGET_DT - elapsed
+
     if sleep_time > 0:
         time.sleep(sleep_time)  # 초 단위
 

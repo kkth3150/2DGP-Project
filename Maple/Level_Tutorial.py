@@ -4,6 +4,7 @@ from Scroll_Manager import ScrollManager
 from Line_Manager import LineManager, Line
 from Player import Player
 from Default_UI import Default_UI, UI_INDEX
+from Slime import Slime
 
 class level_tutorial:
     def __init__(self):
@@ -16,12 +17,11 @@ class level_tutorial:
         rm.load(self.bg_key, self.bg_path)
         rm.load("Player_Left","Resource/Player/Player_Left.png")
         rm.load("Player_Right", "Resource/Player/Player_Right.png")
-
         rm.load("UI_EXP_BAR","Resource/UI/EXPBar.png")
-
         rm.load("Inventory", "Resource/UI/Inventory_Small.png")
 
-
+        rm.load("Slime_Left","Resource/Monster/SlimLeft.png")
+        rm.load("Slime_Right", "Resource/Monster/SlimRight.png")
 
         self.bg_image = rm.get(self.bg_key)
 
@@ -46,6 +46,9 @@ class level_tutorial:
         if not players:
             player = Player(x=300, y=400)
             ObjectManager.instance().add_object(player, OBJ.PLAYER)
+
+        slime1 = Slime(x=500, y=600)  # 위쪽 라인 근처 → 떨어져서 착지
+        ObjectManager.instance().add_object(slime1, OBJ.MONSTER)
 
         exp_ui = Default_UI(UI_INDEX.EXP_BAR, player=player, x=400, y=40)
         ObjectManager.instance().add_object(exp_ui, OBJ.UI)
