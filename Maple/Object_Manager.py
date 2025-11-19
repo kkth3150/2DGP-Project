@@ -1,5 +1,5 @@
 from enum import IntEnum, auto
-
+from Collision_Manager import CollisionManager
 
 OBJ_DEAD = 1
 OBJ_ALIVE = 0
@@ -12,8 +12,10 @@ class OBJ(IntEnum):
     PLAYER = 4
     EFFECT = 5
     DAMAGE = 6
-    UI = 7
-    END = 8
+    PLAYER_SKILLBOX = 7
+    MONSTER_SKILLBOX = 8
+    UI = 9
+    END = 10
 
 
 class ObjectManager:
@@ -41,6 +43,11 @@ class ObjectManager:
         return self.objects[obj_type]
 
     def update(self, dt):
+        collision_mgr = CollisionManager.instance()
+        player_skillboxes = self.objects[OBJ.PLAYER_SKILLBOX]
+        monsters = self.objects[OBJ.MONSTER] + self.objects[OBJ.BOSS]  # 보스도 포함 가능
+        collision_mgr.collision_rect(player_skillboxes, monsters)
+
         for obj_list in self.objects:
             dead = []
             for obj in obj_list:

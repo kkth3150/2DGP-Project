@@ -128,7 +128,7 @@ class Player(GameObject):
         if im.Key_Down(SDLK_LCTRL) and self.attack_timer == 0:
             self.prev_state = self.state
             self.state = PlayerState.ATTACK
-            self.attack_timer = 0.45
+            self.attack_timer = 0.25
 
             self.combo_step += 1
             if self.combo_step > 7:
