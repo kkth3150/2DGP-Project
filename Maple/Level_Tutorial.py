@@ -14,54 +14,9 @@ class level_tutorial:
         self.bg_image = None
 
     def initialize(self):
-        rm = ResourceManager.instance()
-        rm.load(self.bg_key, self.bg_path)
-        rm.load("Player_Left","Resource/Player/Player_Left.png")
-        rm.load("Player_Right", "Resource/Player/Player_Right.png")
-        rm.load("UI_EXP_BAR","Resource/UI/EXPBar.png")
-        rm.load("Inventory", "Resource/UI/Inventory_Small.png")
-
-        rm.load("Slime_Left","Resource/Monster/SlimLeft.png")
-        rm.load("Slime_Right", "Resource/Monster/SlimRight.png")
-
-        rm.load("NPC","Resource/NPC/NPC.png")
-        rm.load("Quest_Available","Resource/NPC/Quest1.png")
-        rm.load("Quest_Progress", "Resource/NPC/Quest2.png")
-        rm.load("Quest_Complete", "Resource/NPC/Quest3.png")
-
-        self.bg_image = rm.get(self.bg_key)
-
-        ground_line1 = Line(0, 210, self.bg_image.w, 210, thickness=5)
-        LineManager.instance().add_line(ground_line1)
-
-        ground_line2 = Line(280, 450, self.bg_image.w-180, 450, thickness=5)
-        LineManager.instance().add_line(ground_line2)
-
-        small_ground_line1 = Line(105,335,230,335,thickness=5)
-        LineManager.instance().add_line(small_ground_line1)
-
-        small_ground_line2 = Line(105,400,230,400,thickness=5)
-        LineManager.instance().add_line(small_ground_line2)
-
-
-        ObjectLine2 = Line(272,270,372,270,thickness=5)
-        LineManager.instance().add_line(ObjectLine2)
-
-
-        players = ObjectManager.instance().get_objects(OBJ.PLAYER)
-        if not players:
-            player = Player(x=300, y=400)
-            ObjectManager.instance().add_object(player, OBJ.PLAYER)
-
-        slime1 = Slime(x=500, y=600)  # 위쪽 라인 근처 → 떨어져서 착지
-        ObjectManager.instance().add_object(slime1, OBJ.MONSTER)
-
-        npc = NPC(x=165, y=430)
-        ObjectManager.instance().add_object(npc, OBJ.NPC)
-
-
-        exp_ui = Default_UI(UI_INDEX.EXP_BAR, player=player, x=400, y=40)
-        ObjectManager.instance().add_object(exp_ui, OBJ.UI)
+        self.load_resources()
+        self.create_lines()
+        self.create_objects()
 
     def update(self,dt):
         ObjectManager.instance().update(dt)
@@ -84,3 +39,88 @@ class level_tutorial:
 
     def release(self):
         ObjectManager.instance().release_all_except([OBJ.PLAYER])
+
+    def load_resources(self):
+        rm = ResourceManager.instance()
+
+        rm.load(self.bg_key, self.bg_path)
+        rm.load("Player_Left", "Resource/Player/Player_Left.png")
+        rm.load("Player_Right", "Resource/Player/Player_Right.png")
+        rm.load("UI_EXP_BAR", "Resource/UI/EXPBar.png")
+        rm.load("Inventory", "Resource/UI/Inventory_Small.png")
+
+        rm.load("Slime_Left", "Resource/Monster/SlimLeft.png")
+        rm.load("Slime_Right", "Resource/Monster/SlimRight.png")
+
+        rm.load("NPC", "Resource/NPC/NPC.png")
+        rm.load("Quest_Available", "Resource/NPC/Quest1.png")
+        rm.load("Quest_Progress", "Resource/NPC/Quest2.png")
+        rm.load("Quest_Complete", "Resource/NPC/Quest3.png")
+
+        rm.load("Num_0","Resource/UI/Num/0.png")
+        rm.load("Num_1","Resource/UI/Num/1.png")
+        rm.load("Num_2","Resource/UI/Num/2.png")
+        rm.load("Num_3","Resource/UI/Num/3.png")
+        rm.load("Num_4","Resource/UI/Num/4.png")
+        rm.load("Num_5","Resource/UI/Num/5.png")
+        rm.load("Num_6","Resource/UI/Num/6.png")
+        rm.load("Num_7","Resource/UI/Num/7.png")
+        rm.load("Num_8","Resource/UI/Num/8.png")
+        rm.load("Num_9","Resource/UI/Num/9.png")
+        rm.load("Critical","Resource/UI/Num/critical.png")
+
+        rm.load("Swing1_L","Resource/Effect/Attack/Swing1L.png")
+        rm.load("Swing1_R", "Resource/Effect/Attack/Swing1R.png")
+        rm.load("Swing2_L","Resource/Effect/Attack/Swing2L.png")
+        rm.load("Swing2_R","Resource/Effect/Attack/Swing2R.png")
+        rm.load("Swing3_L","Resource/Effect/Attack/Swing3L.png")
+        rm.load("Swing3_R", "Resource/Effect/Attack/Swing3R.png")
+
+        rm.load("Beyonder1_L", "Resource/Effect/Attack/Beyond1L.png")
+        rm.load("Beyonder1_R", "Resource/Effect/Attack/Beyond1R.png")
+        rm.load("Beyonder2_L","Resource/Effect/Attack/Beyond2L.png")
+        rm.load("Beyonder2_R", "Resource/Effect/Attack/Beyond2R.png")
+        rm.load("Beyonder3_L","Resource/Effect/Attack/Beyond3L.png")
+        rm.load("Beyonder3_R", "Resource/Effect/Attack/Beyond3R.png")
+        rm.load("Beyonder4_L","Resource/Effect/Attack/Beyond4L.png")
+        rm.load("Beyonder4_R", "Resource/Effect/Attack/Beyond4R.png")
+
+        self.bg_image = rm.get(self.bg_key)
+
+    # ---------------------------
+    # 라인 생성
+    # ---------------------------
+    def create_lines(self):
+        lm = LineManager.instance()
+
+        lm.add_line(Line(0, 210, self.bg_image.w, 210, thickness=5))
+        lm.add_line(Line(280, 450, self.bg_image.w - 180, 450, thickness=5))
+
+        lm.add_line(Line(105, 335, 230, 335, thickness=5))
+        lm.add_line(Line(105, 400, 230, 400, thickness=5))
+
+        lm.add_line(Line(272, 270, 372, 270, thickness=5))
+
+
+    def create_objects(self):
+        om = ObjectManager.instance()
+
+        # 플레이어가 없으면 생성
+        players = om.get_objects(OBJ.PLAYER)
+        if not players:
+            player = Player(x=300, y=400)
+            om.add_object(player, OBJ.PLAYER)
+        else:
+            player = players[0]
+
+        # 몬스터
+        slime1 = Slime(x=500, y=600)
+        om.add_object(slime1, OBJ.MONSTER)
+
+        # NPC
+        npc = NPC(x=165, y=430)
+        om.add_object(npc, OBJ.NPC)
+
+        # UI
+        exp_ui = Default_UI(UI_INDEX.EXP_BAR, player=player, x=400, y=40)
+        om.add_object(exp_ui, OBJ.UI)

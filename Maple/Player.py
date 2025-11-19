@@ -7,6 +7,8 @@ from enum import Enum, auto
 from Resource_Manager import ResourceManager
 from Animation_Manager import Animation
 from Inventory import Inventory
+from Skill import Skill,Skill_Kind
+from Object_Manager import ObjectManager, OBJ
 
 class PlayerState(Enum):
     IDLE = auto()
@@ -38,6 +40,11 @@ class Player(GameObject):
         # 공격 타이머
         self.attack_timer = 0
         self.prev_state = PlayerState.IDLE
+
+        self.combo_step = 0          # 현재 콤보 단계
+        self.combo_timer = 0         # 콤보 유지 시간
+        self.combo_timeout = 0.7     # 0.7초 안에 눌러야 다음 공격
+
 
         rm = ResourceManager.instance()
         self.image_left = rm.get("Player_Left")
@@ -85,6 +92,11 @@ class Player(GameObject):
                 self.attack_timer = 0
                 self.state = self.prev_state  # 공격 끝나면 이전 상태로
 
+        if self.combo_timer > 0:
+            self.combo_timer -= dt
+        else:
+            self.combo_step = 0  # 시간 초과 시 콤보 초기화
+
     def handle_input(self, dt):
         dx = 0
         im = Input_manager.instance()
@@ -93,7 +105,6 @@ class Player(GameObject):
         if self.state == PlayerState.ATTACK and self.on_ground:
             dx = 0
         else:
-            # ← → 화살표 이동
             if im.Key_Pressing(SDLK_LEFT):
                 dx = -self.speed * dt
                 self.direction = Direction.LEFT
@@ -108,17 +119,26 @@ class Player(GameObject):
                 if self.on_ground and self.attack_timer == 0:
                     self.state = PlayerState.IDLE
 
-        # 점프 → Alt (왼쪽 Alt 사용, 오른쪽 Alt면 SDLK_RALT)
+        # 점프
         if im.Key_Down(SDLK_LALT) and self.on_ground and self.attack_timer == 0:
             self.vy = self.jump_power
             self.on_ground = False
             self.state = PlayerState.JUMP
-
-        # 공격 → Ctrl (왼쪽 Ctrl 사용, 오른쪽 Ctrl면 SDLK_RCTRL)
+        # 공격
         if im.Key_Down(SDLK_LCTRL) and self.attack_timer == 0:
             self.prev_state = self.state
             self.state = PlayerState.ATTACK
-            self.attack_timer = 0.45  # 공격 모션 지속 시간
+            self.attack_timer = 0.45
+
+            self.combo_step += 1
+            if self.combo_step > 7:
+                self.combo_step = 1
+
+            self.combo_timer = self.combo_timeout
+
+            skill_kind = self.get_combo_skill(self.combo_step, self.direction)
+            skill = Skill(self.x, self.y, skill_kind)
+            ObjectManager.instance().add_object(skill, OBJ.EFFECT)
 
         if im.Key_Down(SDLK_i):
             self.inventory.is_open = not self.inventory.is_open
@@ -167,3 +187,16 @@ class Player(GameObject):
 
     def release(self):
         pass
+
+    def get_combo_skill(self, step, direction):
+        mapping = {
+            1: (Skill_Kind.Swing1_L, Skill_Kind.Swing1_R),
+            2: (Skill_Kind.Swing2_L, Skill_Kind.Swing2_R),
+            3: (Skill_Kind.Swing3_L, Skill_Kind.Swing3_R),
+            4: (Skill_Kind.Beyond1_L, Skill_Kind.Beyond1_R),
+            5: (Skill_Kind.Beyond2_L, Skill_Kind.Beyond2_R),
+            6: (Skill_Kind.Beyond3_L, Skill_Kind.Beyond3_R),
+            7: (Skill_Kind.Beyond4_L, Skill_Kind.Beyond4_R),
+        }
+        left_skill, right_skill = mapping.get(step, (Skill_Kind.Swing1_L, Skill_Kind.Swing1_R))
+        return left_skill if direction == Direction.LEFT else right_skill

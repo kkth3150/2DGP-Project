@@ -6,12 +6,11 @@ from Animation_Manager import Animation
 from enum import Enum, auto
 from Input_Manager import Input_manager
 
-
 class QuestIconState(Enum):
-    NONE = auto()          # 아이콘 없음
-    AVAILABLE = auto()     # 퀘스트 수령 가능 (!)
-    IN_PROGRESS = auto()   # 진행 중 (…)
-    COMPLETE = auto()      # 완료 (✔)
+    NONE = auto()
+    AVAILABLE = auto()
+    IN_PROGRESS = auto()
+    COMPLETE = auto()
 
 
 class NPC(GameObject):
@@ -90,14 +89,13 @@ class NPC(GameObject):
         if im.Mouse_Down(SDL_BUTTON_LEFT):
             mx, my = im.Mouse_Pos()
             scroll_x, scroll_y = ScrollManager.instance().get_scroll()
-            # NPC 기준 스크롤 적용
             left = self.x - self.col_w // 2 - scroll_x
             right = self.x + self.col_w // 2 - scroll_x
             bottom = self.y - self.col_h // 2 - scroll_y
             top = self.y + self.col_h // 2 - scroll_y
 
             if left <= mx <= right and bottom <= my <= top:
-                # 클릭 시 퀘스트 상태 변경 (순환)
+
                 if self.quest_state == QuestIconState.AVAILABLE:
                     self.quest_state = QuestIconState.IN_PROGRESS
                 elif self.quest_state == QuestIconState.IN_PROGRESS:
@@ -106,3 +104,6 @@ class NPC(GameObject):
                     self.quest_state = QuestIconState.NONE
                 else:
                     self.quest_state = QuestIconState.AVAILABLE
+
+
+
