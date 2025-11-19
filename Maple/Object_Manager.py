@@ -11,8 +11,9 @@ class OBJ(IntEnum):
     BOSS = 3
     PLAYER = 4
     EFFECT = 5
-    UI = 6
-    END = 7
+    DAMAGE = 6
+    UI = 7
+    END = 8
 
 
 class ObjectManager:
