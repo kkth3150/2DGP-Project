@@ -2,6 +2,7 @@ from GameObject import GameObject
 from Resource_Manager import ResourceManager
 from pico2d import *
 import time
+from Scroll_Manager import ScrollManager
 
 class DamageNumber(GameObject):
     def __init__(self, x, y, value, critical = False):
@@ -36,13 +37,15 @@ class DamageNumber(GameObject):
         if self.is_dead:
             return
 
-        start_x = self.x
+        scroll_x, scroll_y = ScrollManager.instance().get_scroll()
+        start_x = self.x - scroll_x
+        start_y = self.y + self.offset_y - scroll_y
 
-
-        self.critical_image.draw(start_x, self.y + self.offset_y)
+        # 크리티컬 표시
+        self.critical_image.draw(start_x, start_y)
         start_x += self.spacing  # 숫자 시작 위치는 항상 일정 간격
 
         for i, ch in enumerate(self.value):
             idx = int(ch)
             img = self.num_images[idx]
-            img.draw(start_x + i * self.spacing, self.y + self.offset_y)
+            img.draw(start_x + i * self.spacing, start_y)

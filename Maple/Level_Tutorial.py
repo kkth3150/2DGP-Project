@@ -108,7 +108,7 @@ class level_tutorial:
         # 플레이어가 없으면 생성
         players = om.get_objects(OBJ.PLAYER)
         if not players:
-            player = Player(x=300, y=400)
+            player = Player(x=300, y=600)
             om.add_object(player, OBJ.PLAYER)
         else:
             player = players[0]
