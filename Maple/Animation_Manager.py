@@ -1,18 +1,29 @@
 class Animation:
-    def __init__(self, image, frame_w, frame_h, frame_data, fps=8):
+    def __init__(self, image, frame_w, frame_h, frame_data, fps=8, loop=True):
         self.image = image
         self.frame_w = frame_w
         self.frame_h = frame_h
-        self.frame_data = frame_data  # 예: [(x, y, frame_count)]
+        self.frame_data = frame_data  # 예: {'x':0,'y':0,'frame_count':3}
         self.fps = fps
         self.timer = 0
         self.frame_index = 0
+        self.loop = loop
+        self.is_finished = False  # 종료 플래그 추가
 
     def update(self, dt):
+        if self.is_finished:
+            return  # 끝났으면 더 이상 업데이트하지 않음
+
         self.timer += dt
         if self.timer > 1 / self.fps:
             self.timer = 0
-            self.frame_index = (self.frame_index + 1) % self.frame_data['frame_count']
+            self.frame_index += 1
+            if self.frame_index >= self.frame_data['frame_count']:
+                if self.loop:
+                    self.frame_index = 0
+                else:
+                    self.frame_index = self.frame_data['frame_count'] - 1
+                    self.is_finished = True  # 애니 종료 플래그 ON
 
     def draw(self, x, y, scroll_x, scroll_y):
         sx = self.frame_data['x'] + self.frame_index * self.frame_w
