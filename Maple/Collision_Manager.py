@@ -76,3 +76,23 @@ class CollisionManager:
 
         return None, None
 
+    def collision_player_item(self, player_list, item_list):
+        for player in player_list:
+            player.near_items.clear()
+
+            for item in item_list:
+                if self.check_rect_intersect(player.get_col_rect(), item.get_col_rect()):
+                    player.near_items.append(item)
+
+    def collision_player_hit(self, player_list, enemy_sources):
+
+        for player in player_list:
+            if hasattr(player, "is_invincible") and player.is_invincible:
+                continue
+
+            for src in enemy_sources:
+                if self.check_rect_intersect(player.get_col_rect(), src.get_col_rect()):
+                    player.hit(src)
+
+                    if hasattr(player, "start_invincible_time"):
+                        player.start_invincible_time()

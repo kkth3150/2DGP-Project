@@ -32,3 +32,6 @@ class GameObject:
         bottom = self.y - self.col_h // 2
         top = self.y + self.col_h // 2
         return left, right, bottom, top
+
+    def set_dead(self):
+        self.is_dead = True

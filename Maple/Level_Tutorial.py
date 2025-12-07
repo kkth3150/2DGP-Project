@@ -85,6 +85,9 @@ class level_tutorial:
         rm.load("Beyonder4_L","Resource/Effect/Attack/Beyond4L.png")
         rm.load("Beyonder4_R", "Resource/Effect/Attack/Beyond4R.png")
 
+        rm.load("Potion","Resource/Item/Item_Potion.png")
+
+
         self.bg_image = rm.get(self.bg_key)
 
     # ---------------------------

@@ -12,10 +12,11 @@ class OBJ(IntEnum):
     PLAYER = 4
     EFFECT = 5
     DAMAGE = 6
-    PLAYER_SKILLBOX = 7
-    MONSTER_SKILLBOX = 8
-    UI = 9
-    END = 10
+    ITEM = 7
+    PLAYER_SKILLBOX = 8
+    MONSTER_SKILLBOX = 9
+    UI = 10
+    END = 11
 
 
 class ObjectManager:
@@ -44,9 +45,18 @@ class ObjectManager:
 
     def update(self, dt):
         collision_mgr = CollisionManager.instance()
-        player_skillboxes = self.objects[OBJ.PLAYER_SKILLBOX]
-        monsters = self.objects[OBJ.MONSTER] + self.objects[OBJ.BOSS]  # 보스도 포함 가능
-        collision_mgr.collision_rect(player_skillboxes, monsters)
+        player = self.objects[OBJ.PLAYER]
+
+        enemy_sources = self.objects[OBJ.MONSTER] + \
+                        self.objects[OBJ.BOSS] + \
+                        self.objects[OBJ.MONSTER_SKILLBOX]
+
+        collision_mgr.collision_player_hit(player, enemy_sources)
+
+        collision_mgr.collision_rect(self.objects[OBJ.PLAYER_SKILLBOX],
+                                     self.objects[OBJ.MONSTER] + self.objects[OBJ.BOSS])
+
+        collision_mgr.collision_player_item(player, self.objects[OBJ.ITEM])
 
         for obj_list in self.objects:
             dead = []

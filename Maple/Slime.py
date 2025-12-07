@@ -7,7 +7,7 @@ from Object_Manager import ObjectManager, OBJ
 from Line_Manager import LineManager
 from pico2d import *
 from Damage import DamageNumber
-
+from Item import DropItem
 
 class SlimeState(Enum):
     IDLE = auto()
@@ -25,8 +25,8 @@ class Slime(GameObject):
     def __init__(self, x=600, y=300):
         super().__init__(x, y, size=50)
 
-        self.hp = 10000000
-        self.speed = 30
+        self.hp = 10000
+        self.speed = 50
         self.state = SlimeState.IDLE
         self.direction = Direction.LEFT
         self.agro = False
@@ -41,7 +41,6 @@ class Slime(GameObject):
         self.image_left = rm.get("Slime_Left")
         self.image_right = rm.get("Slime_Right")
 
-        # 애니메이션 설정 (Animation 클래스에 is_finished 포함)
         self.animations = {
             (SlimeState.IDLE, Direction.LEFT):
                 Animation(self.image_left, 100, 100, {'x':0,'y':400,'frame_count':3}, fps=8, loop=True),
@@ -72,19 +71,17 @@ class Slime(GameObject):
         anim = self.animations[(self.state, self.direction)]
         anim.update(dt)
 
-        # 🎯 DEAD 상태 처리: 애니메이션이 끝나면 is_dead = True로 설정하고 다음 프레임부터 업데이트 중단
         if self.state == SlimeState.DEAD:
             if anim.is_finished:
                 self.is_dead = True
                 return 1  # 객체 삭제 신호
-            # DEAD 상태에서는 다른 모든 로직을 건너뜁니다.
             return
 
-        # DEAD 상태가 아닐 경우에만 중력 및 상태 변경 로직 실행
+
         self.apply_gravity(dt)
         player = self.find_player()
 
-        # HIT 상태 체크
+
         if self.state == SlimeState.HIT:
             self.hit_timer += dt
             if self.hit_timer >= self.hit_duration:
@@ -93,19 +90,13 @@ class Slime(GameObject):
                     self.state = SlimeState.IDLE
                     self.agro = True
 
-        # 플레이어 추적 / 패트롤
+
         if self.agro and player:
             self.chase_or_idle(player, dt)
         else:
             if self.state != SlimeState.HIT:
                 self.patrol(dt)
 
-        # 플레이어 추적 / 패트롤
-        if self.agro and player:
-            self.chase_or_idle(player, dt)
-        else:
-            if self.state != SlimeState.HIT:
-                self.patrol(dt)
 
     def chase_or_idle(self, player, dt):
         dx = player.x - self.x
@@ -153,10 +144,10 @@ class Slime(GameObject):
         ObjectManager.instance().add_object(dmg_num, OBJ.EFFECT)
 
         if self.hp <= 0:
-            self.die()  # 바로 DEAD 상태로
+            self.die()
             return
 
-        # 아직 살아있으면 HIT 상태
+
         self.state = SlimeState.HIT
         self.hit_timer = 0
         self.agro = True
@@ -165,6 +156,8 @@ class Slime(GameObject):
         self.state = SlimeState.DEAD
         self.vx = 0
         self.vy = 0
+        potion = DropItem(self.x, self.y - 30)
+        ObjectManager.instance().add_object(potion, OBJ.ITEM)  # or OBJ.ITEM
 
     def apply_gravity(self, dt):
         self.vy -= self.gravity * dt

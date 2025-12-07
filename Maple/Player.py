@@ -27,6 +27,7 @@ class Player(GameObject):
         super().__init__(x, y, size=50)
 
         self.inventory = Inventory(self, x=400, y=300)
+        ObjectManager.instance().add_object(self.inventory, OBJ.UI)
         self.hp = 100
         self.speed = 200
         self.vy = 0
@@ -34,10 +35,12 @@ class Player(GameObject):
         self.jump_power = 500
         self.on_ground = False
 
+        self.near_items = []
+        self.is_invincible = False
+
         self.state = PlayerState.IDLE
         self.direction = Direction.RIGHT
 
-        # 공격 타이머
         self.attack_timer = 0
         self.prev_state = PlayerState.IDLE
 
@@ -45,6 +48,8 @@ class Player(GameObject):
         self.combo_timer = 0         # 콤보 유지 시간
         self.combo_timeout = 0.7     # 0.7초 안에 눌러야 다음 공격
 
+        self.hitbox_width = 40
+        self.hitbox_height = 70
 
         rm = ResourceManager.instance()
         self.image_left = rm.get("Player_Left")
@@ -143,17 +148,37 @@ class Player(GameObject):
         if im.Key_Down(SDLK_i):
             self.inventory.is_open = not self.inventory.is_open
 
+        if im.Key_Down(SDLK_z):
+            self.pickup_item()
+
         self.x += dx
+
+    def pickup_item(self):
+        if not self.near_items:
+            return
+
+        for item in self.near_items:
+            if self.inventory:
+                self.inventory.add_potion()
+
+            item.set_dead()
+
+        self.near_items.clear()
 
     def apply_gravity(self, dt):
         self.vy -= self.gravity * dt
         new_y = self.y + self.vy * dt
 
-        foot_y = new_y - self.size / 2
+        standing_offset = 10
+
+        # foot_y 기준 자체를 offset 적용
+        foot_y = new_y - self.size / 2 - standing_offset
+
         collided_y, collided = LineManager.instance().collision_line(self.x, foot_y, abs(self.vy * dt))
 
         if collided and self.vy <= 0:
-            self.y = collided_y + self.size / 2
+            # 여기서 offset 포함하여 최종 위치 결정
+            self.y = collided_y + self.size / 2 + standing_offset
             self.vy = 0
             self.on_ground = True
         else:
@@ -180,7 +205,10 @@ class Player(GameObject):
         anim = self.animations[(self.state, self.direction)]
         anim.draw(self.x, self.y, scroll_x, scroll_y)
 
-        self.inventory.render()
+        scroll_x, scroll_y = ScrollManager.instance().get_scroll()
+        x1, y1, x2, y2 = self.get_col_rect()
+        draw_rectangle(x1 - scroll_x, y1 - scroll_y, x2 - scroll_x, y2 - scroll_y)
+
 
     def late_update(self):
         pass
@@ -200,3 +228,8 @@ class Player(GameObject):
         }
         left_skill, right_skill = mapping.get(step, (Skill_Kind.Swing1_L, Skill_Kind.Swing1_R))
         return left_skill if direction == Direction.LEFT else right_skill
+
+    def get_col_rect(self):
+        w = self.hitbox_width / 2
+        h = self.hitbox_height / 2
+        return (self.x - w, self.y - h, self.x + w, self.y + h)
