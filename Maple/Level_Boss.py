@@ -9,17 +9,26 @@ from NPC import NPC    # ← NPC 불러오기!
 from Portal import Portal
 from Level_Manager import LEVEL_ID
 from Boss import Boss
+from pico2d import *
+
 class level_boss:
     def __init__(self):
         self.bg_key = "Boss_Map"
         self.bg_path = "Resource/Map/BossField.png"  # 배경 이미지 경로
         self.bg_image = None
+        self.bgm = load_music("Resource/Sound/TimeChaos.mp3")
+        self.bgm.set_volume(32)
+        self.bgm.repeat_play()
+        ObjectManager.instance().clear_objects(OBJ.MONSTER)
+
+
 
     def initialize(self):
         self.load_resources()
         self.create_lines()
         self.create_objects()
         self.change_objects()
+
 
     def update(self,dt):
         ObjectManager.instance().update(dt)

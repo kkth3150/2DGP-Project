@@ -6,14 +6,14 @@ OBJ_ALIVE = 0
 
 class OBJ(IntEnum):
     BACKGROUND = 0
-    NPC = 1
-    MONSTER = 2
-    BOSS = 3
+    MONSTER = 1
+    BOSS = 2
+    PORTAL = 3
     PLAYER = 4
     EFFECT = 5
     DAMAGE = 6
     ITEM = 7
-    PORTAL = 8
+    NPC = 8
     PLAYER_SKILLBOX = 9
     MONSTER_SKILLBOX = 10
     UI = 11

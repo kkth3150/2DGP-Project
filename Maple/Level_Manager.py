@@ -1,5 +1,6 @@
 from enum import IntEnum, auto
 
+
 class LEVEL_ID(IntEnum):
     LEVEL_MENU = 0
     LEVEL_TUTORIAL = 1

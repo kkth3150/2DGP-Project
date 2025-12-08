@@ -16,7 +16,6 @@ class Inventory(GameObject):
 
         self.is_open = False
 
-        # 슬롯 위치 (UI 기준 – 고정 좌표)
         self.slot_x = self.x -70
         self.slot_y = self.y +115
         self.slot_size = 32
@@ -44,4 +43,5 @@ class Inventory(GameObject):
 
         if self.potion_count > 0:
             self.potion_img.draw(slot_draw_x, slot_draw_y, 32, 32)
-
+            font = load_font('ENCR10B.TTF', 16)  # 기존 폰트 사용
+            font.draw(slot_draw_x, slot_draw_y-10, f"x{self.potion_count}", (255, 0, 0))

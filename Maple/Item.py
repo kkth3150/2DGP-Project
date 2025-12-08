@@ -62,8 +62,6 @@ class DropItem(GameObject):
         )
 
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
-        x1, y1, x2, y2 = self.get_col_rect()
-        draw_rectangle(x1 - scroll_x, y1 - scroll_y, x2 - scroll_x, y2 - scroll_y)
 
     def get_col_rect(self):
         size = 20
