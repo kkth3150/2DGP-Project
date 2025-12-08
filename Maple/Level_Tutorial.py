@@ -53,6 +53,7 @@ class level_tutorial:
         rm.load("Player_Right", "Resource/Player/Player_Right.png")
         rm.load("UI_EXP_BAR", "Resource/UI/EXPBar.png")
         rm.load("Inventory", "Resource/UI/Inventory_Small.png")
+        rm.load("Hp_Bar","Resource/UI/hp.png")
 
         rm.load("Slime_Left", "Resource/Monster/SlimLeft.png")
         rm.load("Slime_Right", "Resource/Monster/SlimRight.png")
@@ -129,6 +130,9 @@ class level_tutorial:
         # UI
         exp_ui = Default_UI(UI_INDEX.EXP_BAR, player=player, x=400, y=40)
         om.add_object(exp_ui, OBJ.UI)
+
+        hp_ui = Default_UI(UI_INDEX.HP_BAR, player=player, x=407, y=41)
+        om.add_object(hp_ui, OBJ.UI)
 
         portal = Portal(x=300, y=300, target_level=LEVEL_ID.LEVEL_BOSS)
         om.add_object(portal, OBJ.PORTAL)

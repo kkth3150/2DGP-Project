@@ -7,6 +7,7 @@ class GameObject:
         self.is_dead = False
         self.col_w = x
         self.col_h = y
+        self.max_hp = 0
 
 
     def update(self, dt):

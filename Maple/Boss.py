@@ -106,7 +106,6 @@ class Boss(GameObject):
         # ---- 공격 조건 ----
         if self.attack_timer >= self.attack_cooldown:
             if distance < 200:
-                # 근접 공격 / 에너지볼 공격 랜덤 선택
                 attack_choice = random.choice([ BossAttackType.MELEE,BossAttackType.ENERGY_BALL,
                                                 BossAttackType.TELEPORT_SLASH])
                 self.start_attack(attack_choice)
