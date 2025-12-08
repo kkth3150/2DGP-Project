@@ -1,3 +1,5 @@
+
+
 class level_boss_enter:
     def __init__(self):
         pass
@@ -15,4 +17,7 @@ class level_boss_enter:
         pass
 
     def release(self):
+        pass
+
+    def load_resources(self):
         pass

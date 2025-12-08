@@ -13,10 +13,11 @@ class OBJ(IntEnum):
     EFFECT = 5
     DAMAGE = 6
     ITEM = 7
-    PLAYER_SKILLBOX = 8
-    MONSTER_SKILLBOX = 9
-    UI = 10
-    END = 11
+    PORTAL = 8
+    PLAYER_SKILLBOX = 9
+    MONSTER_SKILLBOX = 10
+    UI = 11
+    END = 12
 
 
 class ObjectManager:
@@ -40,6 +41,9 @@ class ObjectManager:
         if obj in self.objects[obj_type]:
             self.objects[obj_type].remove(obj)
 
+    def clear_objects(self, obj_type: OBJ):
+        self.objects[obj_type].clear()
+
     def get_objects(self, obj_type: OBJ):
         return self.objects[obj_type]
 
@@ -57,7 +61,7 @@ class ObjectManager:
                                      self.objects[OBJ.MONSTER] + self.objects[OBJ.BOSS])
 
         collision_mgr.collision_player_item(player, self.objects[OBJ.ITEM])
-
+        collision_mgr.collision_player_portal(player,self.objects[OBJ.PORTAL])
         for obj_list in self.objects:
             dead = []
             for obj in obj_list:
