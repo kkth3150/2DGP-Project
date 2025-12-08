@@ -40,6 +40,7 @@ class Player(GameObject):
         self.near_items = []
         self.near_portal = None
         self.is_invincible = False
+        self.invincible_timer = 0.0  # 무적 지속 시간
 
         self.state = PlayerState.IDLE
         self.direction = Direction.RIGHT
@@ -82,9 +83,26 @@ class Player(GameObject):
         scroll_mgr.scroll_x = 0
         scroll_mgr.scroll_y = 0
 
+    def hit(self, attacker=None, dmg=20):
+        if self.is_invincible:
+            return  # 무적이면 피격 무시
+        self.start_invincible_time()  # 피격 시 무적 시작
+        self.hp -= dmg
+
+
+    def start_invincible_time(self):
+        self.is_invincible = True
+        self.invincible_timer = 1  # 0.5초 무적
+
     def update(self, dt):
         if self.is_dead:
             return
+
+        if self.is_invincible:
+            self.invincible_timer -= dt
+            if self.invincible_timer <= 0:
+                self.is_invincible = False
+                self.invincible_timer = 0
 
         self.handle_attack_timer(dt)
         self.handle_input(dt)
@@ -109,7 +127,6 @@ class Player(GameObject):
         dx = 0
         im = Input_manager.instance()
 
-        # 지상 공격 중에는 이동 불가
         if self.state == PlayerState.ATTACK and self.on_ground:
             dx = 0
         else:

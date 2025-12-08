@@ -9,6 +9,7 @@ class UI_INDEX(Enum):
     EXP_BAR = auto()
     HP_BAR = auto()
     MP_BAR = auto()
+    BOSS_HP_BAR = auto()
 
 class Default_UI(GameObject):
     def __init__(self, ui_type, player=None, x=400, y=50):
@@ -21,6 +22,10 @@ class Default_UI(GameObject):
         elif ui_type == UI_INDEX.EXP_BAR:
             width, height = 800, 80
             img_key = "UI_EXP_BAR"
+        elif ui_type == UI_INDEX.BOSS_HP_BAR:
+            width, height = 800, 15
+            img_key = "Hp_Bar"
+            self.boss = self.find_boss()
         elif ui_type == UI_INDEX.INFO_BAR:
             pass
 
@@ -47,6 +52,10 @@ class Default_UI(GameObject):
         players = ObjectManager.instance().get_objects(OBJ.PLAYER)
         return players[0] if players else None
 
+    def find_boss(self):
+        boss = ObjectManager.instance().get_objects(OBJ.BOSS)
+        return boss[0] if boss else None
+
     def update(self, dt):
         if self.ui_type == UI_INDEX.HP_BAR and self.player:
             if self.player.max_hp > 0:
@@ -60,6 +69,11 @@ class Default_UI(GameObject):
             pass  # 적용 안 함
         elif self.ui_type == UI_INDEX.INFO_BAR:
             pass  # 적용 안 함
+        elif self.ui_type == UI_INDEX.BOSS_HP_BAR and self.boss:
+            if self.boss.max_hp > 0:
+                health_ratio = self.boss.hp / self.boss.max_hp
+                self.width = int(self.full_width * health_ratio)
+                self.width = max(0, self.width)
 
     def render(self):
         if self.image:
@@ -80,6 +94,10 @@ class Default_UI(GameObject):
                     self.width,  # 현재 HP 비율에 맞춰 계산된 너비
                     self.height  # 원래 높이
                 )
+            elif self.ui_type == UI_INDEX.BOSS_HP_BAR:
+                # 화면 최상단 가운데 고정
+                draw_x = self.x - self.full_width / 2 + self.width / 2
+                self.image.draw(draw_x, self.y, self.width, self.height)
             else:
                 # MP/EXP/INFO BAR 등 기타 UI는 이미지 전체를 그립니다.
                 self.image.draw(self.x, self.y)

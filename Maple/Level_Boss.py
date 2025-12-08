@@ -79,13 +79,15 @@ class level_boss:
         boss = Boss(x=800, y=150)
         om.add_object(boss, OBJ.BOSS)
 
+        bossHp = Default_UI(UI_INDEX.BOSS_HP_BAR, x=400, y=600)
+        om.add_object(bossHp, OBJ.UI)
+
     def change_objects(self):
         om = ObjectManager.instance()
         players = om.get_objects(OBJ.PLAYER)
 
         if players:
             player = players[0]
-            # 위치만 보스맵 기준으로 재배치
             player.x = 50
             player.y = 200
         else:
