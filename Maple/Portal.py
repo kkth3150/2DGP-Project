@@ -28,7 +28,6 @@ class Portal(GameObject):
     def render(self):
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
         self.anim.draw(self.x, self.y, scroll_x, scroll_y)
-        self.render_hitbox()
 
     def get_col_rect(self):
         return (self.x - 40, self.y - 60, self.x + 40, self.y + 60)

@@ -9,7 +9,9 @@ from Animation_Manager import Animation
 from Inventory import Inventory
 from Skill import Skill,Skill_Kind
 from Object_Manager import ObjectManager, OBJ
-from Level_Manager import level_manager
+from Level_Manager import level_manager, LEVEL_ID
+from Default_UI import UI_INDEX, Default_UI
+
 
 class PlayerState(Enum):
     IDLE = auto()
@@ -44,7 +46,40 @@ class Player(GameObject):
 
         self.state = PlayerState.IDLE
         self.direction = Direction.RIGHT
+        self.a1sound = load_wav("Resource/Sound/airo1e.wav")
+        self.a1sound.set_volume(32)
+        self.a2sound = load_wav("Resource/Sound/airo2e.wav")
+        self.a2sound.set_volume(32)
+        self.a3sound = load_wav("Resource/Sound/airo3e.wav")
+        self.a3sound.set_volume(32)
+        self.b1sound = load_wav("Resource/Sound/Beyond1h.wav")
+        self.b1sound.set_volume(32)
+        self.b2sound = load_wav("Resource/Sound/Beyond2h.wav")
+        self.b2sound.set_volume(32)
+        self.b3sound = load_wav("Resource/Sound/Beyond3h.wav")
+        self.b3sound.set_volume(32)
+        self.b4sound = load_wav("Resource/Sound/Beyond4h.wav")
+        self.b4sound.set_volume(32)
 
+        self.jumpsound = load_wav("Resource/Sound/Jump.wav")
+        self.jumpsound.set_volume(32)
+        self.pickupsound = load_wav("Resource/Sound/PickUpItem.wav")
+        self.pickupsound.set_volume(32)
+        self.Potionsound = load_wav("Resource/Sound/Potion.wav")
+        self.Potionsound.set_volume(32)
+        self.hitsound = load_wav("Resource/Sound/hit.wav")
+        self.hitsound.set_volume(32)
+
+        # 그 다음 딕셔너리 생성
+        self.attack_sounds = {
+            1: self.a1sound,
+            2: self.a2sound,
+            3: self.a3sound,
+            4: self.b1sound,
+            5: self.b2sound,
+            6: self.b3sound,
+            7: self.b4sound
+        }
         self.attack_timer = 0
         self.prev_state = PlayerState.IDLE
 
@@ -58,6 +93,7 @@ class Player(GameObject):
         rm = ResourceManager.instance()
         self.image_left = rm.get("Player_Left")
         self.image_right = rm.get("Player_Right")
+
 
         self.animations = {
             (PlayerState.IDLE, Direction.RIGHT): Animation(self.image_right, 128, 128,
@@ -83,11 +119,12 @@ class Player(GameObject):
         scroll_mgr.scroll_x = 0
         scroll_mgr.scroll_y = 0
 
-    def hit(self, attacker=None, dmg=20):
+    def hit(self, attacker=None, dmg=30):
         if self.is_invincible:
             return  # 무적이면 피격 무시
         self.start_invincible_time()  # 피격 시 무적 시작
         self.hp -= dmg
+        self.hitsound.play()
 
 
     def start_invincible_time(self):
@@ -95,8 +132,18 @@ class Player(GameObject):
         self.invincible_timer = 1  # 0.5초 무적
 
     def update(self, dt):
+
         if self.is_dead:
-            return
+            return 1
+
+        if self.hp <= 0:
+            om = ObjectManager.instance()
+            self.hp = 0
+            self.is_dead = True
+            LOSE_UI = Default_UI(UI_INDEX.LOSE, x=400, y=30)
+            om.add_object(LOSE_UI, OBJ.UI)
+
+
 
         if self.is_invincible:
             self.invincible_timer -= dt
@@ -146,6 +193,7 @@ class Player(GameObject):
 
         # 점프
         if im.Key_Down(SDLK_LALT) and self.on_ground and self.attack_timer == 0:
+            self.jumpsound.play()
             self.vy = self.jump_power
             self.on_ground = False
             self.state = PlayerState.JUMP
@@ -159,6 +207,10 @@ class Player(GameObject):
             if self.combo_step > 7:
                 self.combo_step = 1
 
+            sound = self.attack_sounds.get(self.combo_step)
+            if sound:
+                sound.play()
+
             self.combo_timer = self.combo_timeout
 
             skill_kind = self.get_combo_skill(self.combo_step, self.direction)
@@ -171,6 +223,10 @@ class Player(GameObject):
         if im.Key_Down(SDLK_z):
             self.pickup_item()
 
+        if im.Key_Down(SDLK_x):
+            if self.inventory.use_potion():  # 포션 있으면 사용
+                self.Potionsound.play()
+                self.hp = self.max_hp
         if im.Key_Down(SDLK_UP) and self.near_portal:
             level_manager.instance().level_change(self.near_portal.target_level)
             return
@@ -184,6 +240,7 @@ class Player(GameObject):
 
         for item in self.near_items:
             if self.inventory:
+                self.pickupsound.play()
                 self.inventory.add_potion()
 
             item.set_dead()
@@ -229,10 +286,8 @@ class Player(GameObject):
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
         anim = self.animations[(self.state, self.direction)]
         anim.draw(self.x, self.y, scroll_x, scroll_y)
-
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
-        x1, y1, x2, y2 = self.get_col_rect()
-        draw_rectangle(x1 - scroll_x, y1 - scroll_y, x2 - scroll_x, y2 - scroll_y)
+
 
 
     def late_update(self):

@@ -1,3 +1,5 @@
+from pico2d import load_music
+
 from Object_Manager import ObjectManager, OBJ
 from Resource_Manager import ResourceManager
 from Scroll_Manager import ScrollManager
@@ -5,23 +7,39 @@ from Line_Manager import LineManager, Line
 from Player import Player
 from Default_UI import Default_UI, UI_INDEX
 from Slime import Slime
-from NPC import NPC    # ← NPC 불러오기!
-from Portal import Portal
-from Level_Manager import LEVEL_ID
+from NPC import NPC
+
 
 class level_tutorial:
     def __init__(self):
         self.bg_key = "Tutorial_Map"
         self.bg_path = "Resource/Map/Skill_Field.png"  # 배경 이미지 경로
         self.bg_image = None
+        self.slime_positions = [
+            (200, 300), (400, 300), (600, 300), (800, 300), (1000, 300),
+            (280, 500), (480, 500), (580, 500), (680, 500), (880, 500)
+        ]
+        self.spawn_interval = 1.0  # 1초마다 한 마리씩 스폰
+        self.time_since_last_spawn = 0.0
+        self.next_slime_index = 0  # 다음에 생성할 위치 인덱스
+        self.bgm = load_music("Resource/Sound/FloralLife.mp3")
+        self.bgm.set_volume(32)
+        self.bgm.repeat_play()
 
     def initialize(self):
         self.load_resources()
         self.create_lines()
         self.create_objects()
 
+
     def update(self,dt):
         ObjectManager.instance().update(dt)
+        self.time_since_last_spawn += dt
+
+        current_slimes = ObjectManager.instance().get_objects(OBJ.MONSTER)
+        if len(current_slimes) < 10 and self.time_since_last_spawn >= self.spawn_interval:
+            self.spawn_one_slime()
+            self.time_since_last_spawn = 0.0
 
     def late_update(self):
         ObjectManager.instance().late_update()
@@ -41,6 +59,7 @@ class level_tutorial:
 
     def release(self):
         ObjectManager.instance().clear_objects(OBJ.MONSTER)
+        ObjectManager.instance().clear_objects(OBJ.ITEM)
         ObjectManager.instance().clear_objects(OBJ.NPC)
         ObjectManager.instance().clear_objects(OBJ.PORTAL)
         LineManager.instance().clear()
@@ -95,6 +114,12 @@ class level_tutorial:
 
         rm.load("Portal","Resource/UI/potal.png")
 
+        rm.load("CHAT1","Resource/NPC/request.png")
+        rm.load("CHAT2", "Resource/NPC/finish.png")
+
+        rm.load("Win","Resource/NPC/Win.png")
+        rm.load("Lose","Resource/NPC/Lose.png")
+
         self.bg_image = rm.get(self.bg_key)
 
     def create_lines(self):
@@ -108,6 +133,15 @@ class level_tutorial:
 
         lm.add_line(Line(272, 270, 372, 270, thickness=5))
 
+    def spawn_one_slime(self):
+        if self.next_slime_index >= len(self.slime_positions):
+            self.next_slime_index = 0  # 순환 가능
+
+        pos = self.slime_positions[self.next_slime_index]
+        slime = Slime(x=pos[0], y=pos[1])
+        ObjectManager.instance().add_object(slime, OBJ.MONSTER)
+
+        self.next_slime_index += 1
 
     def create_objects(self):
         om = ObjectManager.instance()
@@ -134,5 +168,3 @@ class level_tutorial:
         hp_ui = Default_UI(UI_INDEX.HP_BAR, player=player, x=407, y=41)
         om.add_object(hp_ui, OBJ.UI)
 
-        portal = Portal(x=300, y=300, target_level=LEVEL_ID.LEVEL_BOSS)
-        om.add_object(portal, OBJ.PORTAL)

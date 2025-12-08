@@ -310,10 +310,7 @@ class PlayerSkillBox(GameObject):
         scroll = ScrollManager.instance()
         scroll_x = scroll.scroll_x
         scroll_y = scroll.scroll_y
-        draw_rectangle(self.x - self.width/2 - scroll_x,
-                       self.y - self.height/2 - scroll_y,
-                       self.x + self.width/2 - scroll_x,
-                       self.y + self.height/2 - scroll_y)
+
 
     def get_col_rect(self):
         return (self.x - self.width/2,

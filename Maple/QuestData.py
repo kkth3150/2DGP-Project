@@ -1,0 +1,1 @@
+global_quest_kill_count = 0

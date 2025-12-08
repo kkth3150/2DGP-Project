@@ -8,6 +8,8 @@ from Line_Manager import LineManager
 from pico2d import *
 from Damage import DamageNumber
 from Item import DropItem
+import QuestData
+from NPC import NPC, QuestIconState
 
 class SlimeState(Enum):
     IDLE = auto()
@@ -158,7 +160,12 @@ class Slime(GameObject):
         self.vy = 0
         potion = DropItem(self.x, self.y - 30)
         ObjectManager.instance().add_object(potion, OBJ.ITEM)  # or OBJ.ITEM
-
+        npcs = ObjectManager.instance().get_objects(OBJ.NPC)
+        if npcs:
+            npc = npcs[0]
+            if npc.quest_state == QuestIconState.IN_PROGRESS:
+                # 기존의 from QuestData import global_quest_kill_count 는 사용하지 말고
+                QuestData.global_quest_kill_count += 1  # <- 이렇게 모듈명을 명시해야 글로벌 변수가 제대로 증가
     def apply_gravity(self, dt):
         self.vy -= self.gravity * dt
         new_y = self.y + self.vy * dt
@@ -180,7 +187,6 @@ class Slime(GameObject):
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
         anim = self.animations[(self.state, self.direction)]
         anim.draw(self.x, self.y, scroll_x, scroll_y)
-        self.render_hitbox()
 
     def get_col_rect(self):
         width = 70

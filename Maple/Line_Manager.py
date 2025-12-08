@@ -54,8 +54,7 @@ class LineManager:
         return collided_y, min_delta != float('inf')
 
     def render(self, scroll_x=0, scroll_y=0):
-        for line in self.lines:
-            line.render(scroll_x, scroll_y)
+        pass
 
     def remove_line(self, line):
         if line in self.lines:

@@ -7,6 +7,7 @@ from Object_Manager import ObjectManager, OBJ
 from Damage import DamageNumber
 import random
 from pico2d import *
+from Default_UI import Default_UI, UI_INDEX
 
 class BossState(Enum):
     IDLE = auto()
@@ -29,9 +30,8 @@ class Boss(GameObject):
 
     def __init__(self, x=800, y=400):
         super().__init__(x, y, size=120)
-
-        self.max_hp =10000000
-        self.hp = 10000000
+        self.max_hp =3000000
+        self.hp = 3000000
         self.speed = 120
         self.state = BossState.IDLE
         self.direction = Direction.LEFT
@@ -51,9 +51,21 @@ class Boss(GameObject):
 
         self.locked_animation = None
 
+        self.attack_sounds = {
+            BossAttackType.MELEE: load_wav("Resource/Sound/bAttack1.wav"),
+            BossAttackType.ENERGY_BALL: load_wav("Resource/Sound/bAttack2.wav"),
+            BossAttackType.TELEPORT_SLASH: load_wav("Resource/Sound/bAttack3.wav"),
+        }
+        for sound in self.attack_sounds.values():
+            sound.set_volume(32)
     # -------------------- 업데이트 -------------------- #
     def update(self, dt):
         if self.state == BossState.DEAD:
+            om = ObjectManager.instance()
+            self.hp = 0
+            self.is_dead = True
+            WIN_UI = Default_UI(UI_INDEX.WIN, x=400, y=30)
+            om.add_object(WIN_UI, OBJ.UI)
             return 1
 
         player = self.find_player()
@@ -106,7 +118,6 @@ class Boss(GameObject):
         scroll_x, scroll_y = ScrollManager.instance().get_scroll()
         anim = self.select_animation()
         anim.draw(self.x, self.y, scroll_x, scroll_y)
-        self.render_hitbox()
 
     # -------------------- AI -------------------- #
     def control_AI(self, player, dt):
@@ -178,6 +189,7 @@ class Boss(GameObject):
         self.current_attack = attack_type
         self.attack_timer = 0
 
+
         self.original_pos = (self.x, self.y)
         self.direction_locked = self.direction
         self.spell_casted = False  # 에너지볼 발사 체크 초기화
@@ -186,6 +198,10 @@ class Boss(GameObject):
         self.locked_animation.reset()
 
         self.apply_attack_offset()
+
+        sound = self.attack_sounds.get(attack_type)
+        if sound:
+            sound.play()
 
     # -------------------- 공격 애니메이션 생성 -------------------- #
     def create_attack_animation(self):
@@ -299,14 +315,9 @@ class BossSkillBox(GameObject):
         return 0
 
     def render(self):
-        # 디버깅용 히트박스 표시
-        scroll = ScrollManager.instance()
-        scroll_x = scroll.scroll_x
-        scroll_y = scroll.scroll_y
-        draw_rectangle(self.x - self.width/2 - scroll_x,
-                       self.y - self.height/2 - scroll_y,
-                       self.x + self.width/2 - scroll_x,
-                       self.y + self.height/2 - scroll_y)
+        pass
+
+
 
     def get_col_rect(self):
         return (self.x - self.width/2,
