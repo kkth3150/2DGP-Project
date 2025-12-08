@@ -52,7 +52,6 @@ class ObjectManager:
         player = self.objects[OBJ.PLAYER]
 
         enemy_sources = self.objects[OBJ.MONSTER] + \
-                        self.objects[OBJ.BOSS] + \
                         self.objects[OBJ.MONSTER_SKILLBOX]
 
         collision_mgr.collision_player_hit(player, enemy_sources)
