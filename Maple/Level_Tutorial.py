@@ -6,6 +6,8 @@ from Player import Player
 from Default_UI import Default_UI, UI_INDEX
 from Slime import Slime
 from NPC import NPC    # ← NPC 불러오기!
+from Portal import Portal
+from Level_Manager import LEVEL_ID
 
 class level_tutorial:
     def __init__(self):
@@ -38,7 +40,10 @@ class level_tutorial:
 
 
     def release(self):
-        ObjectManager.instance().release_all_except([OBJ.PLAYER])
+        ObjectManager.instance().clear_objects(OBJ.MONSTER)
+        ObjectManager.instance().clear_objects(OBJ.NPC)
+        ObjectManager.instance().clear_objects(OBJ.PORTAL)
+        LineManager.instance().clear()
 
     def load_resources(self):
         rm = ResourceManager.instance()
@@ -87,12 +92,10 @@ class level_tutorial:
 
         rm.load("Potion","Resource/Item/Item_Potion.png")
 
+        rm.load("Portal","Resource/UI/potal.png")
 
         self.bg_image = rm.get(self.bg_key)
 
-    # ---------------------------
-    # 라인 생성
-    # ---------------------------
     def create_lines(self):
         lm = LineManager.instance()
 
@@ -108,7 +111,6 @@ class level_tutorial:
     def create_objects(self):
         om = ObjectManager.instance()
 
-        # 플레이어가 없으면 생성
         players = om.get_objects(OBJ.PLAYER)
         if not players:
             player = Player(x=300, y=600)
@@ -127,3 +129,6 @@ class level_tutorial:
         # UI
         exp_ui = Default_UI(UI_INDEX.EXP_BAR, player=player, x=400, y=40)
         om.add_object(exp_ui, OBJ.UI)
+
+        portal = Portal(x=300, y=300, target_level=LEVEL_ID.LEVEL_BOSS)
+        om.add_object(portal, OBJ.PORTAL)

@@ -84,6 +84,14 @@ class CollisionManager:
                 if self.check_rect_intersect(player.get_col_rect(), item.get_col_rect()):
                     player.near_items.append(item)
 
+    def collision_player_portal(self, player_list, portal_list):
+        for player in player_list:
+            player.near_portal = None
+
+            for portal in portal_list:
+                if self.check_rect_intersect(player.get_col_rect(), portal.get_col_rect()):
+                    player.near_portal = portal
+
     def collision_player_hit(self, player_list, enemy_sources):
 
         for player in player_list:

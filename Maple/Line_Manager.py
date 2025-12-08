@@ -56,3 +56,10 @@ class LineManager:
     def render(self, scroll_x=0, scroll_y=0):
         for line in self.lines:
             line.render(scroll_x, scroll_y)
+
+    def remove_line(self, line):
+        if line in self.lines:
+            self.lines.remove(line)
+
+    def clear(self):
+        self.lines.clear()

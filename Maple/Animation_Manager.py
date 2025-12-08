@@ -30,6 +30,13 @@ class Animation:
         sy = self.frame_data['y']
         self.image.clip_draw(sx, sy, self.frame_w, self.frame_h, x - scroll_x, y - scroll_y)
 
+
+    def reset(self):
+        self.frame_index = 0
+        self.timer = 0
+        self.is_finished = False
+
+
 class SkillAnimation:
     def __init__(self, image, frame_width, frame_height, frame_count, change_speed=0.05, loop=False):
         self.image = image

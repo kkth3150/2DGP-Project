@@ -6,7 +6,7 @@ from Input_Manager import Input_manager
 class MainApp:
     def __init__(self):
         self.running = True
-        self.level_manager = level_manager()
+        self.level_manager = level_manager.instance()
 
     def initialize(self):
         self.level_manager.level_change(LEVEL_ID.LEVEL_TUTORIAL)

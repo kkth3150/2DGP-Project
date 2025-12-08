@@ -9,6 +9,7 @@ from Animation_Manager import Animation
 from Inventory import Inventory
 from Skill import Skill,Skill_Kind
 from Object_Manager import ObjectManager, OBJ
+from Level_Manager import level_manager
 
 class PlayerState(Enum):
     IDLE = auto()
@@ -36,6 +37,7 @@ class Player(GameObject):
         self.on_ground = False
 
         self.near_items = []
+        self.near_portal = None
         self.is_invincible = False
 
         self.state = PlayerState.IDLE
@@ -150,6 +152,11 @@ class Player(GameObject):
 
         if im.Key_Down(SDLK_z):
             self.pickup_item()
+
+        if im.Key_Down(SDLK_UP) and self.near_portal:
+            level_manager.instance().level_change(self.near_portal.target_level)
+            return
+
 
         self.x += dx
 
